@@ -1,0 +1,33 @@
+{
+  "name": "metalsmith-pooleapp",
+  "version": "0.0.1",
+  "description": "Metalsmith plugin to retrieve data stored in http://pooleapp.com/",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dpobel/metalsmith-pooleapp.git"
+  },
+  "keywords": [
+    "metalsmith",
+    "poole",
+    "pooleapp",
+    "comment",
+    "commenting"
+  ],
+  "author": "Damien Pobel <damien@pobel.fr>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dpobel/metalsmith-pooleapp/issues"
+  },
+  "homepage": "https://github.com/dpobel/metalsmith-pooleapp",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-mocha-test": "^0.12.0",
+    "mocha": "^1.21.4"
+  }
+}
