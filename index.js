@@ -25,10 +25,30 @@ function fetchFormData(formName, formInfo, cb) {
             }
             cb(false, {
                 "formName": formName,
+                "identifier": formInfo.identifier,
                 "sessions": struct.sessions,
             });
         });
     }).on('error', cb);
+}
+
+function storeSessions(files, formData) {
+    var id, name = formData.formName;
+
+    if ( !formData.identifier ) {
+        return;
+    }
+    id = formData.identifier;
+    Object.keys(files).forEach(function (path) {
+        var fileObj = files[path];
+
+        formData.sessions.forEach(function (data) {
+            if ( fileObj[id] && data[id] && fileObj[id] === data[id] ) {
+                fileObj[name] = fileObj[name] || [];
+                fileObj[name].push(data);
+            }
+        });
+    });
 }
 
 module.exports = function (opts) {
@@ -49,6 +69,7 @@ module.exports = function (opts) {
             }
             data.forEach(function (formData) {
                 metadata.pooleapp[formData.formName] = formData.sessions;
+                storeSessions(files, formData);
             });
             done();
         });
