@@ -35,7 +35,10 @@ describe('PooleApp plugin', function () {
         var conf = {forms: {}};
 
         Object.keys(config).forEach(function (secret) {
-            conf.forms[config[secret].name] = {secret: secret};
+            conf.forms[config[secret].name] = {
+                secret: secret,
+                identifier: config[secret].identifier,
+            };
         });
         return conf;
     }
@@ -122,6 +125,111 @@ describe('PooleApp plugin', function () {
         msPooleApp(poolAppPluginConf(config))(files, metalsmith, function (err) {
             poole.done();
             assert.ok(typeof err !== 'undefined', "The error should be handled");
+
+            done();
+        });
+    });
+
+    it('should add the data to object it belongs to', function (done) {
+        var sessions = {
+                sessions: [
+                    {id: 1, path: "file1"},
+                    {id: 3, path: "file3"},
+                    {id: 2, path: "file1"},
+                ]
+            },
+            config = {
+                "secret": {
+                    "name": "form",
+                    "identifier": "path",
+                    "statusCode": 200,
+                    "body": JSON.stringify(sessions),
+                },
+            },
+            files = {
+                "file1": {path: "file1"},
+                "file2": {path: "file2"},
+                "file3": {path: "file3"},
+            };
+
+        configureNock(config);
+        msPooleApp(poolAppPluginConf(config))(files, metalsmith, function (err) {
+            poole.done();
+            assert.ok(typeof err === 'undefined', "No error should be found");
+
+            assert.ok(
+                typeof files.file2.form === 'undefined',
+                "No data should have been added to file2"
+            );
+            assert.ok(
+                Array.isArray(files.file1.form),
+                "Some data should have been collected in file1"
+            );
+            assert.equal(
+                2, files.file1.form.length,
+                "2 elements should have been collected in file1"
+            );
+            assert.equal(1, files.file1.form[0].id);
+            assert.equal(2, files.file1.form[1].id);
+
+            assert.ok(
+                Array.isArray(files.file3.form),
+                "Some data should have been collected in file3"
+            );
+            assert.equal(
+                1, files.file3.form.length,
+                "1 element should have been collected in file3"
+            );
+            assert.equal(3, files.file3.form[0].id);
+
+            done();
+        });
+    });
+
+    it('should handle mapping errors', function (done) {
+        var sessions = {
+                sessions: [
+                    {id: 1, path: "doesNotExist"},
+                    {id: 3},
+                    {id: 2, path: "file1"},
+                ]
+            },
+            config = {
+                "secret": {
+                    "name": "form",
+                    "identifier": "path",
+                    "statusCode": 200,
+                    "body": JSON.stringify(sessions),
+                },
+            },
+            files = {
+                "file1": {path: "file1"},
+                "file2": {},
+                "file3": {path: "file3"},
+            };
+
+        configureNock(config);
+        msPooleApp(poolAppPluginConf(config))(files, metalsmith, function (err) {
+            poole.done();
+            assert.ok(typeof err === 'undefined', "No error should be found");
+
+            assert.ok(
+                typeof files.file2.form === 'undefined',
+                "No data should have been added to file2"
+            );
+            assert.ok(
+                typeof files.file3.form === 'undefined',
+                "No data should have been added to file3"
+            );
+            assert.ok(
+                Array.isArray(files.file1.form),
+                "Some data should have been collected in file1"
+            );
+            assert.equal(
+                1, files.file1.form.length,
+                "1 element should have been collected in file1"
+            );
+            assert.equal(2, files.file1.form[0].id);
 
             done();
         });
