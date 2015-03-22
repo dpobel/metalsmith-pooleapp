@@ -1,8 +1,20 @@
 var http = require('http'),
     async = require('async'),
     template = require('string-template'),
+    filtrex = require('filtrex'),
 
     DATA_URL_TEMPLATE = 'http://pooleapp.com/data/{secret}.json';
+
+function filterSessions(filterExpr, struct) {
+    if ( !filterExpr ) {
+        return struct;
+    }
+
+    struct.sessions = struct.sessions.filter(
+        filtrex(filterExpr)
+    );
+    return struct;
+}
 
 function fetchFormData(formName, formInfo, cb) {
     http.get(template(DATA_URL_TEMPLATE, formInfo), function (res) {
@@ -19,7 +31,7 @@ function fetchFormData(formName, formInfo, cb) {
 
         res.on('end', function () {
             try {
-                struct = JSON.parse(body);
+                struct = filterSessions(formInfo.filter, JSON.parse(body));
             } catch(e) {
                 return cb(e);
             }

@@ -38,6 +38,7 @@ describe('PooleApp plugin', function () {
             conf.forms[config[secret].name] = {
                 secret: secret,
                 identifier: config[secret].identifier,
+                filter: config[secret].filter,
             };
         });
         return conf;
@@ -230,6 +231,37 @@ describe('PooleApp plugin', function () {
                 "1 element should have been collected in file1"
             );
             assert.equal(2, files.file1.form[0].id);
+
+            done();
+        });
+    });
+
+    it('should filter the sessions object', function (done) {
+        var sessions = {
+                sessions: [{id: 1}, {id: 3}, {id: 2}]
+            },
+            config = {
+                "secret": {
+                    "name": "form",
+                    "statusCode": 200,
+                    "body": JSON.stringify(sessions),
+                    "filter": "id == 3",
+                },
+            };
+
+        configureNock(config);
+        msPooleApp(poolAppPluginConf(config))({}, metalsmith, function (err) {
+            poole.done();
+            assert.ok(typeof err === 'undefined', "No error should be found");
+
+            assert.ok(
+                Array.isArray(metadata.pooleapp.form),
+                "The pooleapp metadata should contain an array"
+            );
+            assert.equal(
+                metadata.pooleapp.form.length, 1,
+                "The pooleapp metadata should contain one entry"
+            );
 
             done();
         });

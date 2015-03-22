@@ -23,6 +23,7 @@ metalsmith.use(pooleApp({
         "comments": {
             "secret": "theSecretKeyFromPooleApp",
             "identifier": "path",
+            "filter": "foor == 2 or bar < 20"
         },
     }
 });
@@ -43,6 +44,8 @@ file.
   the value of this property in the file object and in the remote object and if
 they match, the remote object is added to the array available under the key
 (`comments` here)
+* the `filter` is optional, it allows to filter the PooleApp entries. It uses
+  the [filtrex expression engine](https://www.npmjs.com/package/filtrex).
 
 If you use the metalsmith-permalink plugin, the `identifier` can set to `path`.
 By doing that and by adding the `path` in an hidden form field, the collected
@@ -57,7 +60,8 @@ data are directly available in the file object where the form was filled.
       "forms": {
         "comments": {
           "secret": "theSecretKeyFromPooleApp",
-          "identifier": "path"
+          "identifier": "path",
+          "filter": "foor == 2 or bar < 20"
         }
       }
     }
